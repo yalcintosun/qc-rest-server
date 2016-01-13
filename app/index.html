@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" ng-app='almDashboard' class="no-js">
+<head lang="en" >
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ALM Dashboard</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <!--link rel="stylesheet" href="almDashboard.css"-->
+    <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="almDashboard.js"></script>
+    <script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="col-md-4" ng-controller="selectCtrl as selection">
+        <table class="table table-bordered">
+            <tr>
+                <th>Select</th>
+                <th>Folder</th>
+            </tr>
+            <tr ng-repeat="folder in selection.folders">
+                <td>
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox">
+                        </label>
+                    </div>
+                </td>
+                <td>{{folder.folderName}}</td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
