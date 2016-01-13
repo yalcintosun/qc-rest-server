@@ -5,16 +5,14 @@
   "main": "main.js",
   "author": "ytosun",
   "license": "ISC",
-
   "devDependencies": {
     "bower": "^1.3.1",
     "http-server": "^0.6.1"
   },
-
   "dependencies": {
-    "QC.js": "git+https://github.com/ddikman/QC.js.git"
+    "QC.js": "git+https://github.com/ddikman/QC.js.git",
+    "express": "^4.13.3"
   },
-
   "scripts": {
     "postinstall": "bower install",
     "prestart": "npm install",
