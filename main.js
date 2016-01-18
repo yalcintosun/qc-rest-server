@@ -14,66 +14,87 @@ qcApi.login({
 }).then(
 function(){
     console.log("successfully logged in!");
-    getRootFolderInfo(rootTestFolder,function(hPath){
-        qetAutomatedFolders(hPath,function(automatedFolders){
+    getRootFolderInfo(rootTestFolder)
+    .then(function(hPath){
+        qetAutomatedFolders(hPath)
+        .then(function(automatedFolders){
             console.log("Now printing parsed automated folder list");
             var parsedAutomatedFolders = JSON.parse(automatedFolders);
             console.log(parsedAutomatedFolders);
             //find absolute path of automated folders
+            var pls = [];
             for (var af = 0; af < parsedAutomatedFolders.length; af++) {
-                var pathList = [];
-                getParentFolder(parsedAutomatedFolders[af].id, function (parentFolder) {
-                    console.log("Now printing folder details");
-                    console.log(parentFolder);
-                })
-                //TODO: How will I put the folder id's to a list? Promises?
-                //console.log(pathList);
+              pls.push(getParentFolder(parsedAutomatedFolders[af].id).then(function(parentFolder) {
+                console.log("Now printing folder details");
+                console.log(parentFolder);
+                return parentFolder;
+              }));
             }
-        });
-    });
+            return pls;
+          }).then(function(pl){console.log(pl);});
+        })
 }, function(err){
     console.log("oh shit, something went awry!" + err);
 });
 
+/*
+var storyPromise;
+
+function getChapter(i) {
+  storyPromise = storyPromise || getJSON('story.json');
+
+  return storyPromise.then(function(story) {
+    return getJSON(story.chapterUrls[i]);
+  })
+}
+
+// and using it is simple:
+getChapter(0).then(function(chapter) {
+  console.log(chapter);
+  return getChapter(1);
+}).then(function(chapter) {
+  console.log(chapter);
+});
+*/
+
 //FUNCTIONS
 
-function getRootFolderInfo(folderName, callback) {
-    qcApi.get("/test-folders?query={name['" + folderName + "']}", {'fields': ['id','hierarchical-path']})
+function getRootFolderInfo(folderName) {
+    return qcApi.get("/test-folders?query={name['" + folderName + "']}", {'fields': ['id','hierarchical-path']})
         .then(function(folders){
             console.log("In getRootFolderInfo:");
             console.log(folders[0]);
             var p = JSON.parse(JSON.stringify(folders[0]));
-            callback(p['hierarchical-path']);
+            return p['hierarchical-path'];
         },
         function(err) { console.log("something failed: " + err) });
 }
 
-function qetAutomatedFolders(hPath, callback) {
-    qcApi.get("/test-folders?query={name['automated'];hierarchical-path["+hPath+"*]}", {'fields': ['id','hierarchical-path']})
+function qetAutomatedFolders(hPath) {
+    return qcApi.get("/test-folders?query={name['automated'];hierarchical-path["+hPath+"*]}", {'fields': ['id','hierarchical-path']})
         .then(function(folders){
             console.log("In getAutomatedFolders:");
             console.log(folders[0]);
-            callback(JSON.stringify(folders));
+            return JSON.stringify(folders);
         },
         function(err) { console.log("something failed: " + err) });
 }
 
-function getParentFolder(automatedFolderID, callback) {
-    qcApi.get("/test-folders/" + automatedFolderID)
-        .then(function(folder){
+function getParentFolder(automatedFolderID) {
+    return qcApi.get("/test-folders/" + automatedFolderID)
+        .then(
+          function(folder){
             var parsedParentFolder = JSON.parse(JSON.stringify(folder));
             var parsedField = parsedParentFolder.Entity.Fields[0].Field;
             for (var i = 0; i < parsedField.length; i++) {
                 if (parsedField[i].$.Name === "parent-id") {
-                    callback(parsedField[i].Value);
+                    return parsedField[i].Value;
                 }
             }
-        },
-        function(err) { console.log("something failed: " + err)
-        }).then(console.log, console.error);
+          },
+          function(err) { console.log("something failed: " + err)
+          });
 }
-
-
 
 
 // EXPRESS SERVER SECTION
