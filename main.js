@@ -5,6 +5,8 @@ var qcApi = require('QC.js/qcApi.js').create();
 var userpass = require('./.userpass.json');
 var rootTestFolder = 'SPiDR 4.0';
 
+var parentFoldersList = [];
+
 qcApi.login({
     "server": "http://gbplqc101.genband.com:8080/qcbin",
     "domain": "BBN",
@@ -22,16 +24,18 @@ function(){
             var parsedAutomatedFolders = JSON.parse(automatedFolders);
             console.log(parsedAutomatedFolders);
             //find absolute path of automated folders
-            var pls = [];
-            for (var af = 0; af < parsedAutomatedFolders.length; af++) {
-              pls.push(getParentFolder(parsedAutomatedFolders[af].id).then(function(parentFolder) {
-                console.log("Now printing folder details");
-                console.log(parentFolder);
-                return parentFolder;
-              }));
-            }
-            return pls;
-          }).then(function(pl){console.log(pl);});
+            var sequence = Promise.resolve();
+            parsedAutomatedFolders.forEach(function(folder){
+                sequence = sequence.then(function(){
+                    return getParentFolder((folder.id));
+                }).then(function(parentFolder){
+                    parentFoldersList.push(parentFolder);
+                    return parentFoldersList;
+                });
+            });
+            sequence.then(function(list){console.log(list);});
+
+          })//.then(function(pl){console.log(pl);});
         })
 }, function(err){
     console.log("oh shit, something went awry!" + err);
